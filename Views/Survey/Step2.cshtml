@@ -1,0 +1,238 @@
+@model EcoSystem.Models.Step2ViewModel
+@{
+    ViewData["Title"] = "Сұрақтар";
+}
+
+<div class="screen screen-2">
+
+    <div class="progress-bar">
+        <div class="progress-step done"><span class="step-num">✓</span><span class="step-label">Контекст</span></div>
+        <div class="progress-line filled"></div>
+        <div class="progress-step active"><span class="step-num">2</span><span class="step-label">Сұрақтар</span></div>
+        <div class="progress-line"></div>
+        <div class="progress-step"><span class="step-num">3</span><span class="step-label">Нәтиже</span></div>
+    </div>
+
+    <div class="screen-title">
+        <h2>📍 @Model.City — @(Model.HousingType == "apartment" ? "Пәтер" : "Жеке үй")</h2>
+        <p>Инфрақұрылымды қалай қолданатыныңызды айтыңыз</p>
+    </div>
+
+    <form asp-action="Step2" method="post" class="eco-form">
+        <input type="hidden" asp-for="City" />
+        <input type="hidden" asp-for="HousingType" />
+
+        <!-- ===== А БЛОК: МОБИЛЬДІЛІК ===== -->
+        <div class="pillar-block">
+            <div class="pillar-header">
+                <span class="pillar-icon">🚗</span>
+                <div>
+                    <h3 class="pillar-title">А блок: Қозғалыс</h3>
+                    <p class="pillar-desc">Күнделікті жүру тәртібіңіз</p>
+                </div>
+            </div>
+            <div class="question-group">
+                <label class="form-label">Негізгі транспорт түрі</label>
+                <div class="radio-cards transport-cards">
+                    <label class="radio-card">
+                        <input type="radio" asp-for="TransportType" value="car_petrol" />
+                        <div class="rc-icon">🚗</div><div class="rc-title">Бензин/газ</div><div class="rc-sub">Жеке автокөлік</div>
+                    </label>
+                    <label class="radio-card">
+                        <input type="radio" asp-for="TransportType" value="car_electric" />
+                        <div class="rc-icon">⚡</div><div class="rc-title">Электромобиль</div><div class="rc-sub">Жеке электро</div>
+                    </label>
+                    <label class="radio-card">
+                        <input type="radio" asp-for="TransportType" value="public" />
+                        <div class="rc-icon">🚌</div><div class="rc-title">Қоғамдық</div><div class="rc-sub">Автобус, метро</div>
+                    </label>
+                    <label class="radio-card">
+                        <input type="radio" asp-for="TransportType" value="bike" />
+                        <div class="rc-icon">🚲</div><div class="rc-title">Велосипед</div><div class="rc-sub">Жаяу / велосипед</div>
+                    </label>
+                </div>
+                <span asp-validation-for="TransportType" class="field-error"></span>
+            </div>
+            <div class="question-group">
+                <label class="form-label">Жылына ұшақпен/пойызбен қанша рет саяхаттайсыз?</label>
+                <div class="range-wrapper">
+                    <input type="range" asp-for="FlightsPerYear" min="0" max="20" step="1" class="eco-range" id="flights-range" />
+                    <div class="range-labels">
+                        <span>0</span>
+                        <span id="flights-val" class="range-current">@Model.FlightsPerYear</span>
+                        <span>20</span>
+                    </div>
+                    <p id="flights-desc" class="range-desc"></p>
+                </div>
+            </div>
+        </div>
+
+        <!-- ===== Б БЛОК: ТҰРМЫС ===== -->
+        <div class="pillar-block">
+            <div class="pillar-header">
+                <span class="pillar-icon">🏠</span>
+                <div>
+                    <h3 class="pillar-title">Б блок: Тұрмыс ортасы</h3>
+                    <p class="pillar-desc">Үй шаруашылығы және ресурс тұтыну</p>
+                </div>
+            </div>
+            <div class="question-group">
+                <label class="form-label">Үйді жылыту жүйесі</label>
+                <div class="radio-cards">
+                    <label class="radio-card">
+                        <input type="radio" asp-for="HeatingType" value="central" />
+                        <div class="rc-icon">🏭</div><div class="rc-title">Орталық</div><div class="rc-sub">Мемлекеттік жылу</div>
+                    </label>
+                    <label class="radio-card">
+                        <input type="radio" asp-for="HeatingType" value="house_stove" />
+                        <div class="rc-icon">🔥</div><div class="rc-title">Жеке пеш</div><div class="rc-sub">Газ, от</div>
+                    </label>
+                    <label class="radio-card">
+                        <input type="radio" asp-for="HeatingType" value="none" />
+                        <div class="rc-icon">☀️</div><div class="rc-title">Жылыту жоқ</div><div class="rc-sub">Жылы аймақ</div>
+                    </label>
+                </div>
+                <span asp-validation-for="HeatingType" class="field-error"></span>
+            </div>
+            <div class="question-group">
+                <label class="form-label">Жылына кондиционер қанша ай пайдаланасыз?</label>
+                <div class="range-wrapper">
+                    <input type="range" asp-for="AcUsageMonths" min="0" max="12" step="1" class="eco-range" id="ac-range" />
+                    <div class="range-labels">
+                        <span>0 ай</span>
+                        <span id="ac-val" class="range-current">@Model.AcUsageMonths ай</span>
+                        <span>12 ай</span>
+                    </div>
+                </div>
+            </div>
+            <div class="question-group">
+                <label class="form-label">Ресурстарды үнемдеу</label>
+                <div class="checkbox-cards">
+                    <label class="checkbox-card">
+                        <input type="checkbox" asp-for="HasWaterMeter" />
+                        <span class="cc-icon">💧</span><span class="cc-text">Су есептегіш (счетчик)</span><span class="cc-check">✓</span>
+                    </label>
+                    <label class="checkbox-card">
+                        <input type="checkbox" asp-for="HasLedLights" />
+                        <span class="cc-icon">💡</span><span class="cc-text">LED жарық шамдары</span><span class="cc-check">✓</span>
+                    </label>
+                </div>
+            </div>
+        </div>
+
+        <!-- ===== В БЛОК: ТҰТЫНУ ===== -->
+        <div class="pillar-block">
+            <div class="pillar-header">
+                <span class="pillar-icon">🛍</span>
+                <div>
+                    <h3 class="pillar-title">В блок: Тұтыну жүйесі</h3>
+                    <p class="pillar-desc">Тауар және қалдықтарды басқару</p>
+                </div>
+            </div>
+            <div class="question-group">
+                <label class="form-label">Техника мен киім сатып алу жиілігі</label>
+                <div class="radio-cards">
+                    <label class="radio-card">
+                        <input type="radio" asp-for="ShoppingFrequency" value="rare" />
+                        <div class="rc-icon">🔧</div><div class="rc-title">Сирек</div><div class="rc-sub">Тек сынғанда</div>
+                    </label>
+                    <label class="radio-card">
+                        <input type="radio" asp-for="ShoppingFrequency" value="seasonal" />
+                        <div class="rc-icon">📦</div><div class="rc-title">Маусымдық</div><div class="rc-sub">Жылына 2-4 рет</div>
+                    </label>
+                    <label class="radio-card">
+                        <input type="radio" asp-for="ShoppingFrequency" value="frequent" />
+                        <div class="rc-icon">🛒</div><div class="rc-title">Жиі</div><div class="rc-sub">Трендке ілесу</div>
+                    </label>
+                </div>
+                <span asp-validation-for="ShoppingFrequency" class="field-error"></span>
+            </div>
+            <div class="question-group">
+                <label class="form-label">Ауданыңызда қоқыс сұрыптауға контейнерлер бар ма?</label>
+                <div class="checkbox-cards">
+                    <label class="checkbox-card">
+                        <input type="checkbox" asp-for="HasRecycling" />
+                        <span class="cc-icon">♻️</span><span class="cc-text">Иә, сұрыптау контейнерлері бар</span><span class="cc-check">✓</span>
+                    </label>
+                </div>
+            </div>
+        </div>
+
+        <!-- ===== Г БЛОК: МИКРО-ӘДЕТТЕР (ЖАҢА) ===== -->
+        <div class="pillar-block pillar-micro">
+            <div class="pillar-header">
+                <span class="pillar-icon">☕</span>
+                <div>
+                    <h3 class="pillar-title">Г блок: Күнделікті микро-әдеттер</h3>
+                    <p class="pillar-desc">Кішкентай әрекеттердің нақты физикалық салдары</p>
+                </div>
+            </div>
+
+            <div class="micro-info-banner">
+                <span class="mib-icon">ℹ️</span>
+                <p>Бұл блок сіздің жеке таңдауыңыздың <strong>нақты грамммен</strong> өлшенетін нәтижесін көрсетеді. Жүйені айыптамаймыз — тек шынайы байланысты ашамыз.</p>
+            </div>
+
+            <div class="question-group">
+                <label class="form-label">
+                    ☕ Айына сыртта (кафе, дүкен) неше рет пластик стақанда кофе/шай сатып аласыз?
+                    <span class="label-hint">1 пластик стақан = 15 гр пластик</span>
+                </label>
+                <div class="range-wrapper">
+                    <input type="range" asp-for="CoffeeCupsPerMonth" min="0" max="60" step="1"
+                           class="eco-range micro-range" id="coffee-range" />
+                    <div class="range-labels">
+                        <span>0</span>
+                        <span id="coffee-val" class="range-current">0</span>
+                        <span>60</span>
+                    </div>
+                    <div class="micro-live-calc" id="coffee-calc">
+                        <span class="mlc-icon">🗑️</span>
+                        <span id="coffee-calc-text">Жылына: 0 гр пластик</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="question-group">
+                <label class="form-label">
+                    🛍 Аптасына супермаркетке/дүкенге неше рет барасыз?
+                    <span class="label-hint">1 дүкен пакеті = 8 гр полиэтилен</span>
+                </label>
+                <div class="range-wrapper">
+                    <input type="range" asp-for="ShoppingTripsPerWeek" min="0" max="14" step="1"
+                           class="eco-range micro-range" id="shopping-range" />
+                    <div class="range-labels">
+                        <span>0</span>
+                        <span id="shopping-val" class="range-current">0</span>
+                        <span>14</span>
+                    </div>
+                    <div class="micro-live-calc" id="shopping-calc">
+                        <span class="mlc-icon">🗑️</span>
+                        <span id="shopping-calc-text">Жылына: 0 гр пластик</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Тікелей нәтиже preview -->
+            <div class="micro-total-preview" id="micro-preview">
+                <div class="mtp-row">
+                    <span class="mtp-label">☕ Кофе пластигі</span>
+                    <span class="mtp-val" id="preview-coffee">0 гр/жыл</span>
+                </div>
+                <div class="mtp-row">
+                    <span class="mtp-label">🛍 Пакет пластигі</span>
+                    <span class="mtp-val" id="preview-bags">0 гр/жыл</span>
+                </div>
+                <div class="mtp-divider"></div>
+                <div class="mtp-row mtp-total">
+                    <span class="mtp-label">📦 Барлығы</span>
+                    <span class="mtp-val" id="preview-total">0 кг/жыл</span>
+                </div>
+            </div>
+        </div>
+
+        <button type="submit" class="btn-primary">
+            Нәтижені есептеу <span class="btn-arrow">→</span>
+        </button>
+    </form>
+</div>

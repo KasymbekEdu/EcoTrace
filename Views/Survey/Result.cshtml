@@ -1,0 +1,295 @@
+@model EcoSystem.Models.ResultViewModel
+@{
+    ViewData["Title"] = "Нәтиже";
+    var r    = Model.Result;
+    var city = Model.City;
+
+    string ScoreClass(double s) => s switch {
+        <= 30 => "score-low", <= 55 => "score-medium", <= 75 => "score-high", _ => "score-critical"
+    };
+    string ScoreLabel(double s) => s switch {
+        <= 30 => "Төмен қысым", <= 55 => "Орташа қысым", <= 75 => "Жоғары қысым", _ => "Критикалық"
+    };
+}
+
+<div class="screen screen-3">
+
+    <div class="progress-bar">
+        <div class="progress-step done"><span class="step-num">✓</span><span class="step-label">Контекст</span></div>
+        <div class="progress-line filled"></div>
+        <div class="progress-step done"><span class="step-num">✓</span><span class="step-label">Сұрақтар</span></div>
+        <div class="progress-line filled"></div>
+        <div class="progress-step active"><span class="step-num">3</span><span class="step-label">Нәтиже</span></div>
+    </div>
+
+    <!-- ════════════════════════════════════════
+         ЖОЛ 1: ЖҮЙЕЛІК ИНДЕКС + СИМУЛЯТОР
+    ════════════════════════════════════════ -->
+    <div class="result-layout">
+
+        <!-- СОЛ ЖАҚ: Индекс -->
+        <div class="result-panel left-panel">
+            <h2 class="panel-title">📊 Экологиялық қысым индексі</h2>
+            <p class="panel-sub">@r.City — @(r.HousingType == "apartment" ? "Пәтер" : "Жеке үй")</p>
+
+            <div class="score-circle @ScoreClass(r.TotalScore)">
+                <div class="score-number">@r.TotalScore</div>
+                <div class="score-max">/100</div>
+                <div class="score-label">@ScoreLabel(r.TotalScore)</div>
+            </div>
+
+            <div class="sector-bars">
+                <div class="sector-bar">
+                    <div class="sb-header"><span>🚗 Қозғалыс</span><span class="sb-val">@r.MobilityScore</span></div>
+                    <div class="sb-track"><div class="sb-fill mobility" style="width:@(r.MobilityScore)%"></div></div>
+                </div>
+                <div class="sector-bar">
+                    <div class="sb-header"><span>🏠 Тұрмыс</span><span class="sb-val">@r.LivingScore</span></div>
+                    <div class="sb-track"><div class="sb-fill living" style="width:@(r.LivingScore)%"></div></div>
+                </div>
+                <div class="sector-bar">
+                    <div class="sb-header"><span>🛍 Тұтыну</span><span class="sb-val">@r.ConsumptionScore</span></div>
+                    <div class="sb-track"><div class="sb-fill consumption" style="width:@(r.ConsumptionScore)%"></div></div>
+                </div>
+            </div>
+
+            <div class="metaphors">
+                <div class="metaphor-card">
+                    <div class="metaphor-icon">🌳</div>
+                    <div class="metaphor-body">
+                        <div class="metaphor-value">@r.Co2Trees ағаш</div>
+                        <div class="metaphor-desc">Жылына CO₂ шығарыңызды сіңіру үшін қажет</div>
+                    </div>
+                </div>
+                <div class="metaphor-card">
+                    <div class="metaphor-icon">🏊</div>
+                    <div class="metaphor-body">
+                        <div class="metaphor-value">@r.WaterPools бассейн</div>
+                        <div class="metaphor-desc">Жылдық су шығыны олимпиадалық бассейн санымен</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="system-tag">
+                <div class="st-icon">💡</div>
+                <p>@r.SystemTag</p>
+            </div>
+
+            <a href="/Survey/Step1" class="btn-secondary">← Қайта өту</a>
+        </div>
+
+        <!-- ОҢ ЖАҚ: Жүйелік симулятор -->
+        <div class="result-panel right-panel">
+            <h2 class="panel-title">🎛 Жүйелік симулятор</h2>
+            <p class="panel-sub">«Инфрақұрылым өзгерсе не болады?»</p>
+
+            <div class="sim-score-display">
+                <div class="sim-label">Жаңа индекс</div>
+                <div class="sim-value" id="sim-score">@r.TotalScore</div>
+                <div class="sim-reduction hidden" id="sim-reduction">
+                    <span id="sim-red-val"></span> азайды
+                </div>
+            </div>
+
+            <div class="sim-sliders">
+                <div class="sim-slider-card" id="card-green">
+                    <div class="ssc-header">
+                        <div class="ssc-toggle" id="toggle-green" onclick="toggleSwitch('green')"><div class="ssc-knob"></div></div>
+                        <div class="ssc-info">
+                            <div class="ssc-title">☀️ Жасыл энергия</div>
+                            <div class="ssc-sub">Қала көмірден күн/жел энергиясына көшсе</div>
+                        </div>
+                    </div>
+                    <div class="ssc-impact hidden" id="impact-green">
+                        <span class="impact-arrow">↓</span>
+                        Тұрмыс блогы: <strong>@Math.Round(city.CoalEnergyPercent / 100.0 * 15, 1) балл</strong> азаяды
+                    </div>
+                </div>
+
+                <div class="sim-slider-card" id="card-transport">
+                    <div class="ssc-header">
+                        <div class="ssc-toggle" id="toggle-transport" onclick="toggleSwitch('transport')"><div class="ssc-knob"></div></div>
+                        <div class="ssc-info">
+                            <div class="ssc-title">🚌 Қоғамдық транспорт</div>
+                            <div class="ssc-sub">Ыңғайлы автобус, велосипед жолдары болса</div>
+                        </div>
+                    </div>
+                    <div class="ssc-impact hidden" id="impact-transport">
+                        <span class="impact-arrow">↓</span>
+                        Қозғалыс блогы: <strong>@Math.Round(r.MobilityScore * 0.4, 1) балл</strong> азаяды
+                    </div>
+                </div>
+
+                <div class="sim-slider-card" id="card-local">
+                    <div class="ssc-header">
+                        <div class="ssc-toggle" id="toggle-local" onclick="toggleSwitch('local')"><div class="ssc-knob"></div></div>
+                        <div class="ssc-info">
+                            <div class="ssc-title">🏭 Жергілікті өндіріс</div>
+                            <div class="ssc-sub">Тауарлар жергілікті жасалса</div>
+                        </div>
+                    </div>
+                    <div class="ssc-impact hidden" id="impact-local">
+                        <span class="impact-arrow">↓</span>
+                        Тұтыну блогы: <strong>@Math.Round(r.ConsumptionScore * 0.3, 1) балл</strong> азаяды
+                    </div>
+                </div>
+            </div>
+
+            <!-- Салыстыру чарты -->
+            <div class="compare-chart">
+                <div class="cc-title">Жүйелік өзгеріс болжамы</div>
+                <div class="cc-row">
+                    <span class="cc-label">Қазір</span>
+                    <div class="cc-bar-wrap"><div class="cc-bar current" style="width:@(r.TotalScore)%"><span>@r.TotalScore</span></div></div>
+                </div>
+                <div class="cc-row">
+                    <span class="cc-label">☀️ Жасыл</span>
+                    <div class="cc-bar-wrap"><div class="cc-bar green" style="width:@(Model.GreenEnergyImpact)%"><span>@Model.GreenEnergyImpact</span></div></div>
+                </div>
+                <div class="cc-row">
+                    <span class="cc-label">🚌 Транспорт</span>
+                    <div class="cc-bar-wrap"><div class="cc-bar transport" style="width:@(Model.PublicTransportImpact)%"><span>@Model.PublicTransportImpact</span></div></div>
+                </div>
+                <div class="cc-row">
+                    <span class="cc-label">🏭 Жергілікті</span>
+                    <div class="cc-bar-wrap"><div class="cc-bar local" style="width:@(Model.LocalProductionImpact)%"><span>@Model.LocalProductionImpact</span></div></div>
+                </div>
+                <div class="cc-row" id="combined-row" style="display:none">
+                    <span class="cc-label">✨ Барлығы</span>
+                    <div class="cc-bar-wrap"><div class="cc-bar combined" id="combined-bar"><span id="combined-val"></span></div></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ════════════════════════════════════════
+         ЖОЛ 2: МИКРО-ӘДЕТТЕР ПАНЕЛІ (ЖАҢА)
+    ════════════════════════════════════════ -->
+    <div class="micro-section">
+        <div class="micro-section-header">
+            <h2>☕ Микро-әдеттеріңіздің нақты салдары</h2>
+            <p>Күнделікті кішкентай таңдаулар жылына осыншама пластик тудырады</p>
+        </div>
+
+        <div class="micro-layout">
+
+            <!-- СОЛ: Пластик есебі -->
+            <div class="micro-panel">
+                <h3 class="micro-panel-title">📦 Жылдық пластик шығарым</h3>
+
+                <div class="plastic-stats">
+                    <div class="plastic-stat-card coffee-card">
+                        <div class="psc-icon">☕</div>
+                        <div class="psc-body">
+                            <div class="psc-label">Кофе пластик стақандар</div>
+                            <div class="psc-value">@(r.AnnualCoffeePlasticGrams >= 1000
+                                ? $"{r.AnnualCoffeePlasticGrams/1000:F2} кг"
+                                : $"{r.AnnualCoffeePlasticGrams:F0} гр")</div>
+                            <div class="psc-sub">@r.CoffeeCupsPerMonth стақан/ай × 15 гр × 12 ай</div>
+                        </div>
+                    </div>
+
+                    <div class="plastic-stat-card bag-card">
+                        <div class="psc-icon">🛍</div>
+                        <div class="psc-body">
+                            <div class="psc-label">Дүкен полиэтилен пакеттер</div>
+                            <div class="psc-value">@(r.AnnualBagPlasticGrams >= 1000
+                                ? $"{r.AnnualBagPlasticGrams/1000:F2} кг"
+                                : $"{r.AnnualBagPlasticGrams:F0} гр")</div>
+                            <div class="psc-sub">@r.ShoppingTripsPerWeek бару/апта × 8 гр × 52 апта</div>
+                        </div>
+                    </div>
+
+                    <div class="plastic-total-card">
+                        <div class="ptc-label">Жиыны — полигонға кетеді</div>
+                        <div class="ptc-value">@r.TotalPlasticKg кг/жыл</div>
+                        <div class="ptc-visual">
+                            @{
+                                int bottleCount = (int)Math.Round(r.TotalPlasticKg / 0.025);
+                            }
+                            <span class="ptc-bottles">≈ @bottleCount пластик бөтелке салмағы</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ОҢ: Микро-симулятор -->
+            <div class="micro-panel">
+                <h3 class="micro-panel-title">🔄 Микро-шешім симуляторы</h3>
+                <p class="micro-panel-sub">«Мен таңдасам не болады?» — нақты граммен</p>
+
+                <!-- Пластик сақтауыш -->
+                <div class="micro-sim-display">
+                    <div class="msd-row">
+                        <span class="msd-label">💚 Үнемделген пластик</span>
+                        <span class="msd-value green" id="micro-saved">0 кг</span>
+                    </div>
+                    <div class="msd-row">
+                        <span class="msd-label">🗑️ Қалатын пластик</span>
+                        <span class="msd-value" id="micro-remaining">@r.TotalPlasticKg кг</span>
+                    </div>
+                    <div class="msd-progress-wrap">
+                        <div class="msd-progress-bg">
+                            <div class="msd-progress-fill" id="micro-progress" style="width:0%"></div>
+                        </div>
+                        <span class="msd-pct" id="micro-pct">0% үнемделді</span>
+                    </div>
+                </div>
+
+                <!-- Микро-свитчтер -->
+                <div class="micro-switches">
+                    <div class="micro-switch-card" id="mcard-tumbler">
+                        <div class="msc-header">
+                            <div class="ssc-toggle" id="toggle-tumbler" onclick="toggleMicro('tumbler')">
+                                <div class="ssc-knob"></div>
+                            </div>
+                            <div class="ssc-info">
+                                <div class="ssc-title">☕ Өз термостақанымен жүру</div>
+                                <div class="ssc-sub">Кафеде өз стақанды пайдалану</div>
+                            </div>
+                        </div>
+                        <div class="msc-impact" id="micro-impact-tumbler">
+                            <span class="impact-arrow green-arrow">↓</span>
+                            Үнемделеді: <strong>@Model.TumblerImpact кг пластик/жыл</strong>
+                            <span class="impact-detail">(@r.CoffeeCupsPerMonth × 12 = @(r.CoffeeCupsPerMonth * 12) стақан)</span>
+                        </div>
+                    </div>
+
+                    <div class="micro-switch-card" id="mcard-shopper">
+                        <div class="msc-header">
+                            <div class="ssc-toggle" id="toggle-shopper" onclick="toggleMicro('shopper')">
+                                <div class="ssc-knob"></div>
+                            </div>
+                            <div class="ssc-info">
+                                <div class="ssc-title">🛍 Эко-дорба (шоппер) алып жүру</div>
+                                <div class="ssc-sub">Дүкенде пакет алмау</div>
+                            </div>
+                        </div>
+                        <div class="msc-impact" id="micro-impact-shopper">
+                            <span class="impact-arrow green-arrow">↓</span>
+                            Үнемделеді: <strong>@Model.ShopperImpact кг пластик/жыл</strong>
+                            <span class="impact-detail">(@r.ShoppingTripsPerWeek × 52 = @(r.ShoppingTripsPerWeek * 52) пакет)</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Нәтиже хабарламасы -->
+                <div class="micro-message hidden" id="micro-message">
+                    <div class="mm-icon">🎉</div>
+                    <div class="mm-text" id="micro-message-text"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+</div>
+
+@section Scripts {
+<script>
+    const resultId  = @r.Id;
+    const baseScore = @r.TotalScore;
+    const totalPlasticKg = @r.TotalPlasticKg;
+    const state      = { green: false, transport: false, local: false };
+    const microState = { tumbler: false, shopper: false };
+</script>
+}

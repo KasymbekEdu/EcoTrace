@@ -1,0 +1,162 @@
+@model EcoSystem.Models.Step1ViewModel
+@{
+    ViewData["Title"] = "Контекст";
+}
+
+<div class="screen screen-1">
+
+    <div class="progress-bar">
+        <div class="progress-step active">
+            <span class="step-num">1</span>
+            <span class="step-label">Контекст</span>
+        </div>
+        <div class="progress-line"></div>
+        <div class="progress-step">
+            <span class="step-num">2</span>
+            <span class="step-label">Сұрақтар</span>
+        </div>
+        <div class="progress-line"></div>
+        <div class="progress-step">
+            <span class="step-num">3</span>
+            <span class="step-label">Нәтиже</span>
+        </div>
+    </div>
+
+    <div class="hero-question">
+        <h1>Сен қандай жүйеде өмір сүріп жатырсың?</h1>
+        <p class="hero-sub">Алдымен өз ортаңды анықтайық. Бұл сіздің жеке басыңызды бағаламайды — тек жүйені анықтайды.</p>
+    </div>
+
+    <form asp-action="Step1" method="post" class="eco-form">
+        <asp-validation-summary model-only="true" class="validation-error"></asp-validation-summary>
+
+        <div class="form-section">
+            <div class="form-section-icon">📍</div>
+            <div class="form-section-body">
+                <label class="form-label">Қаланы таңдаңыз</label>
+                <div class="select-wrapper">
+                    <select asp-for="City" id="city-select" class="eco-select">
+                        <option value="">— Қаланы таңдаңыз —</option>
+                        @foreach (var city in Model.Cities)
+                        {
+                            <option value="@city.Name">@city.Name (@city.Region)</option>
+                        }
+                    </select>
+                </div>
+                <span asp-validation-for="City" class="field-error"></span>
+
+                <div id="city-info" class="city-info hidden">
+                    <div class="city-info-row">
+                        <span class="ci-label">⚡ Энергетикадағы көмір үлесі:</span>
+                        <span id="ci-energy" class="ci-value"></span>
+                    </div>
+                    <div class="city-info-row">
+                        <span class="ci-label">🚗 Жеке көліктегі Газ үлесі:</span>
+                        <span id="ci-gas" class="ci-value"></span>
+                    </div>
+                    <div class="city-info-row">
+                        <span class="ci-label">🚌 Қоғамдық көліктегі Дизель үлесі:</span>
+                        <span id="ci-diesel" class="ci-value"></span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="form-section">
+            <div class="form-section-icon">🏠</div>
+            <div class="form-section-body">
+                <label class="form-label">Тұрғын үй түрі</label>
+                <div class="radio-cards">
+                    <label class="radio-card" id="card-apartment">
+                        <input type="radio" asp-for="HousingType" value="apartment" />
+                        <div class="rc-icon">🏢</div>
+                        <div class="rc-title">Пәтер</div>
+                        <div class="rc-sub">Көп қабатты үй</div>
+                    </label>
+                    <label class="radio-card" id="card-house">
+                        <input type="radio" asp-for="HousingType" value="house" />
+                        <div class="rc-icon">🏡</div>
+                        <div class="rc-title">Жеке үй</div>
+                        <div class="rc-sub">Жеке тұрғын үй</div>
+                    </label>
+                </div>
+                <span asp-validation-for="HousingType" class="field-error"></span>
+            </div>
+        </div>
+
+        <div class="manifesto">
+            <p>💚 «Бұл тест сіздің жеке әдеттеріңізді сынамайды. Бұл сіз бен сіздің қалаңыздың экожүйеге бірлескен әсерін есептейді.»</p>
+        </div>
+
+        <button type="submit" class="btn-primary">
+            Жалғастыру <span class="btn-arrow">→</span>
+        </button>
+    </form>
+</div>
+
+<script id="cities-data" type="application/json">
+    @Html.Raw(System.Text.Json.JsonSerializer.Serialize(
+            Model.Cities.Select(c => new
+            {
+                    name = c.Name,
+                    coal = c.CoalEnergyPercent,
+                    gas = c.PrivateGasPercent,
+                    diesel = c.PublicDieselPercent
+            })
+    ))
+</script>
+
+@section Scripts {
+    <script>
+        document.addEventListener("DOMContentLoaded", function () {
+            const selectEl = document.getElementById("city-select");
+            const infoBox = document.getElementById("city-info");
+            const energyEl = document.getElementById("ci-energy");
+            const gasEl = document.getElementById("ci-gas");
+            const dieselEl = document.getElementById("ci-diesel");
+
+            // JSON-нан деректерді қауіпсіз оқу
+            let cities = [];
+            try {
+                const dataText = document.getElementById("cities-data").textContent;
+                cities = JSON.parse(dataText);
+            } catch (e) {
+                console.error("JSON деректерін оқу қатесі:", e);
+            }
+
+            if (selectEl) {
+                selectEl.addEventListener("change", function () {
+                    const selectedName = this.value;
+                    const city = cities.find(c => c.name === selectedName);
+
+                    if (city && infoBox) {
+                        // Жаңа статистиканы көрсету
+                        if (energyEl) energyEl.innerText = city.coal + "%";
+                        if (gasEl) gasEl.innerText = city.gas + "%";
+                        if (dieselEl) dieselEl.innerText = city.diesel + "%";
+                        
+                        infoBox.classList.remove("hidden");
+                    } else if (infoBox) {
+                        infoBox.classList.add("hidden");
+                    }
+                });
+            }
+
+            // Радио-карточкалардың дизайнын басқару
+            const radios = document.querySelectorAll('input[type="radio"][name="HousingType"]');
+            radios.forEach(r => {
+                r.addEventListener("change", function () {
+                    document.querySelectorAll('.radio-card').forEach(c => c.classList.remove('selected'));
+                    if (this.checked) {
+                        this.closest('.radio-card').classList.add('selected');
+                    }
+                });
+                
+                // Егер бет қайта жүктелгенде таңдаулы тұрса
+                if (r.checked) {
+                    r.closest('.radio-card').classList.add('selected');
+                }
+            });
+        });
+    </script>
+}

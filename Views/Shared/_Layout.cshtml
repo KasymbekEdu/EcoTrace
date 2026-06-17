@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html lang="kk">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>@ViewData["Title"] — ЭкоЖүйе</title>
+    <link rel="stylesheet" href="~/css/eco.css" asp-append-version="true" />
+</head>
+<body>
+
+    <header class="site-header">
+        <a href="/Survey/Step1" class="logo">
+            <span class="logo-leaf">🌿</span>
+            <span class="logo-text">ЭкоЖүйе</span>
+        </a>
+        <p class="logo-sub">Қоршаған орта қысым индексі</p>
+    </header>
+
+    <main>
+        @RenderBody()
+    </main>
+
+    <footer class="site-footer">
+        <p>Бұл сайт сіздің жеке кінәңізді сынамайды — жүйелік байланысты көрсетеді.</p>
+    </footer>
+
+    <script src="~/js/eco.js" asp-append-version="true"></script>
+    @await RenderSectionAsync("Scripts", required: false)
+</body>
+</html>
