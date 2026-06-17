@@ -13,4 +13,11 @@
     <PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="8.0.0" />
   </ItemGroup>
 
+<<<<<<< HEAD
+=======
+  <ItemGroup>
+    <Folder Include="Migrations\" />
+  </ItemGroup>
+
+>>>>>>> 5db1d52f17117d0bb49bdc41ed27258f8367f66b
 </Project>
